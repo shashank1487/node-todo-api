@@ -1,4 +1,4 @@
-require('./config/config');
+require("./config/config");
 let _ = require("lodash");
 let { ObjectID } = require("mongodb");
 let express = require("express");
@@ -92,6 +92,21 @@ app.patch("/todos/:id", (req, res) => {
         return res.status(404).send();
       }
       res.send({ todo });
+    })
+    .catch(err => res.status(400).send());
+});
+
+app.post("/users", (req, res) => {
+  let body = _.pick(req.body, ["email", "password"]);
+  let user = new User(body);
+
+  user
+    .save()
+    .then(() => {
+      return user.generateAuthToken();
+    })
+    .then(token => {
+      res.header("x-auth", token).send(user);
     })
     .catch(err => res.status(400).send());
 });
