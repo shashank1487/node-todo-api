@@ -61,10 +61,12 @@ UserSchema.statics.findByToken = function(token) {
   let User = this;
   let decoded;
   try {
+    console.log(token);
     decoded = jwt.verify(token, "abc123");
   } catch (error) {
     // return new Promise((resolve, reject) => {
     //   reject();
+    console.log(error);
     return Promise.reject();
   }
 
@@ -72,6 +74,25 @@ UserSchema.statics.findByToken = function(token) {
     _id: decoded._id,
     "tokens.access": "auth",
     "tokens.token": token
+  });
+};
+
+UserSchema.statics.findByCredentials = function(email, password) {
+  let User = this;
+  return User.findOne({ email }).then(user => {
+    if (!user) {
+      return Promise.reject();
+    }
+    return new Promise((resolve, reject) => {
+      bcrypt.compare(password, user.password, (err, res) => {
+        if (res) {
+          console.log(res);
+          resolve(user);
+        } else {
+          reject();
+        }
+      });
+    });
   });
 };
 
